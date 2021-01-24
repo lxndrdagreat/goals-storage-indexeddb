@@ -1,0 +1,24 @@
+{
+  "name": "goals-storage-indexeddb",
+  "version": "1.0.0",
+  "description": "IndexedDB storage for Goals",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "./node_modules/.bin/tsc --project ./tsconfig.json",
+    "prepublishOnly": "npm run build"
+  },
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "files": [
+    "lib/**/*"
+  ],
+  "author": "Dan Alexander <lxndrdagreat@gmail.com>",
+  "license": "MIT",
+  "devDependencies": {
+    "typescript": "^4.1.3"
+  },
+  "dependencies": {
+    "dexie": "^3.0.3",
+    "goals-core": "^1.0.1"
+  }
+}
