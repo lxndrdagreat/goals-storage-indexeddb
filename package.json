@@ -13,6 +13,7 @@
     "lib/**/*"
   ],
   "author": "Dan Alexander <lxndrdagreat@gmail.com>",
+  "repository": "https://github.com/lxndrdagreat/goals-storage-indexeddb",
   "license": "MIT",
   "devDependencies": {
     "typescript": "^4.1.3"
