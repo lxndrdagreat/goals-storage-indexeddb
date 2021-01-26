@@ -1,11 +1,12 @@
 import {GoalsIndexedDbDatabase} from './goals-database';
 import {
-  CompletionModel,
+  calculateDaysBetweenTwoDates, calculateWeeksBetweenTwoDates,
+  CompletionModel, dateStart, GoalCompletionScore,
   GoalModel,
   GoalNotFoundError,
   GoalOccurrence,
   GoalStorageService,
-  GoalUpsertData
+  GoalUpsertData, weekStart
 } from 'goals-core';
 
 export class GoalsIndexedDBService extends GoalStorageService {
@@ -95,4 +96,52 @@ export class GoalsIndexedDBService extends GoalStorageService {
     }));
   }
 
+  async getGoalCompletionScore(goal: GoalModel): Promise<GoalCompletionScore> {
+    const rightNow = new Date().getTime();
+
+    const completionCount = await this.database.completions
+      .where('goal')
+      .equals(goal.id)
+      .filter(completion => {
+        if (goal.occursDaily) {
+          // daily goals
+          return Math.ceil(
+            Math.abs(rightNow - completion.dateCompleted.getTime())
+            / (1000 * 3600 * 24)
+          ) <= 14;
+        } else {
+          // weekly goals (6 weeks)
+          return Math.ceil(
+            Math.abs(rightNow - completion.dateCompleted.getTime())
+            / (1000 * 3600 * 24)
+          ) <= 42;
+        }
+      })
+      .count();
+
+    const chances = Math.max(
+      1,
+      goal.occursDaily
+        ? Math.min(
+        14,
+        calculateDaysBetweenTwoDates(dateStart(new Date()), dateStart(goal.dateAdded)))
+        : goal.occursWeekly
+        ? Math.min(
+          6,
+          calculateWeeksBetweenTwoDates(weekStart(new Date()), weekStart(goal.dateAdded)) + 1)
+        : 0
+    );
+    if (completionCount === 0) {
+      return {
+        rate: 0,
+        completions: 0,
+        possible: chances
+      };
+    }
+    return {
+      rate: completionCount / chances,
+      completions: completionCount,
+      possible: chances
+    };
+  }
 }
